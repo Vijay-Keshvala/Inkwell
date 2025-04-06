@@ -12,7 +12,7 @@ const logos = [
   { src: 'assets/wiley.svg', alt: 'Statamic' },
 ]
 
-export default function Example() {
+export  const TopPublishers=()=> {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true })
   const controls = useAnimation()
