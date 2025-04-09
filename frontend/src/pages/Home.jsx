@@ -19,7 +19,7 @@ const Home = () => {
             <Promotions />
             <UserExperience />
             <Statistics />
-            <Footer/>
+            {/* <Footer/> */}
     </div>
   )
 }

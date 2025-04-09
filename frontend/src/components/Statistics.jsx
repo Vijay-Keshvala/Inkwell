@@ -34,22 +34,25 @@ export const Statistics = () => {
                         <motion.div
                             key={stat.id}
                             className="mx-auto flex max-w-xs flex-col gap-y-4"
-                            initial={{ opacity: 0, y: 20 }} // Start from below
-                            animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 20 }} // Move up as it comes into view
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 20 }}
                             transition={{
                                 duration: 1,
-                                delay: stat.id * 0.2, // Stagger animation for each stat
+                                delay: stat.id * 0.2,
                             }}
                         >
                             <dt className="text-base text-gray-600">{stat.name}</dt>
                             <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                                 {inView && (
-                                    <CountUp
-                                        start={0}
-                                        end={stat.value}
-                                        duration={2.5} // Duration of the count animation in seconds
-                                        separator=","
-                                    />
+                                    <>
+                                        <CountUp
+                                            start={0}
+                                            end={stat.value}
+                                            duration={2.5}
+                                            separator=","
+                                        />
+                                        +
+                                    </>
                                 )}
                             </dd>
                         </motion.div>
