@@ -2,7 +2,6 @@ import React from 'react'
 import { useState } from 'react'
 import { StarIcon } from '@heroicons/react/20/solid'
 import { Radio, RadioGroup } from '@headlessui/react'
-import { div } from 'three/src/nodes/TSL.js'
 
 const product = {
     name: 'Basic Tee 6-Pack',

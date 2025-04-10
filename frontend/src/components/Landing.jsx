@@ -1,5 +1,4 @@
 import React from 'react'
-
 export const Landing = () => {
   return (
     <div>
@@ -63,7 +62,6 @@ export const Landing = () => {
                                     />
                                 </svg>
                             </span>
-
                         </h1>
                         <p className="mt-4 text-base sm:text-lg md:text-xl text-gray-500">
                             Browse, explore, and shop books you'll love — anytime, anywhere.
