@@ -1,11 +1,10 @@
-
-
-
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 require('dotenv').config() 
+const userRoutes = require('./routes/userRoutes')
 const bookRoutes = require('./routes/bookRoutes')
+const protectedRoutes = require('./routes/protectedRoutes')
 
 const app = express()
 
@@ -26,6 +25,8 @@ app.listen(PORT,()=>{console.log(`Server running on port ${PORT}`);})
 
 
 // Routes // 
+app.use('/api/user', userRoutes);
+app.use('/api', protectedRoutes);
 app.use('/api/books',bookRoutes)
 app.get('/test', (req, res) => {
     res.send('Server is up');
