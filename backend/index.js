@@ -5,6 +5,7 @@ require('dotenv').config()
 const userRoutes = require('./routes/userRoutes')
 const bookRoutes = require('./routes/bookRoutes')
 const protectedRoutes = require('./routes/protectedRoutes')
+const adminBookRoutes = require('./routes/adminBookRoutes');
 
 const app = express()
 
@@ -28,6 +29,7 @@ app.listen(PORT,()=>{console.log(`Server running on port ${PORT}`);})
 app.use('/api/user', userRoutes);
 app.use('/api', protectedRoutes);
 app.use('/api/books',bookRoutes)
+app.use('/api/admin/books', adminBookRoutes);
 app.get('/test', (req, res) => {
     res.send('Server is up');
   });

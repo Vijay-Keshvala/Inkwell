@@ -1,82 +1,31 @@
-const express = require('express')
+const express = require('express');
 const router = express.Router();
-const Book = require('../models/Book')
-const upload = require('../middleware/multer')
+const Book = require('../models/Book');
+const upload = require('../middleware/multer');
+const mongoose = require('mongoose');
 
-// Get all books //
-router.get('/',async (req,res)=>{
-    try {
-        const books = await Book.find()
-        res.json(books)
-    } catch (error) {
-        res.status(500).json({ message: err.message });
-    }
-})
-
-
-router.get('/test', (req, res) => {
-    res.send('Backend working')
-  })
-  
-
-
-// Create a book //
-router.post('/add-book', upload.single('image'), async (req, res) => {
+// ✅ Get all books
+router.get('/', async (req, res) => {
   try {
-      const { title, author, description, price, category, stock } = req.body;
-
-      // Validate required fields
-      if (!title || !author || !description || !price || !category || stock === undefined) {
-          return res.status(400).json({ success: false, message: 'Missing required fields' });
-      }
-
-      if (price <= 0) {
-          return res.status(400).json({ success: false, message: 'Price must be greater than 0' });
-      }
-
-      if (stock < 0) {
-          return res.status(400).json({ success: false, message: 'Stock cannot be negative' });
-      }
-
-      const imageUrl = req.file?.path || ''; // Get secure image URL from Cloudinary
-
-      const book = new Book({
-          title,
-          author,
-          description,
-          price,
-          category,
-          stock,
-          imageUrl
-      });
-
-      const savedBook = await book.save();
-      res.status(201).json({ success: true, data: savedBook });
-
+    const books = await Book.find();
+    res.json(books);
   } catch (error) {
-      console.error('Error creating book:', error);
-      res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Delete a book //
-router.delete('/delete-book/:id',async (req,res)=>{
+// ✅ Get categories (moved before :id route)
+router.get('/categories', async (req, res) => {
   try {
-    const {id} = req.params;
-    const deletedBook = await Book.findByIdAndDelete(id);
-    res.status(200).json({ success: true, message: 'Book deleted successfully', data: deletedBook });
-    if(!deletedBook){
-      return res.status(404).json({ success: false, message: 'Book not found' });
-    }
-    
+    const categories = await Book.distinct('category');
+    res.status(200).json(categories);
   } catch (error) {
-    console.error('Error deleting book:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ message: 'Server error' });
   }
-})
+});
 
-
-// Search books by title, author, or category
+// ✅ Search books (moved before :id route)
 router.get('/search', async (req, res) => {
   try {
     const { query } = req.query;
@@ -85,7 +34,6 @@ router.get('/search', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide a search query' });
     }
 
-    // Case-insensitive partial match
     const books = await Book.find({
       $or: [
         { title: { $regex: query, $options: 'i' } },
@@ -101,26 +49,44 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// Update book //
-router.put('/update-book/:id',async (req,res)=>{
+// ✅ Get books (optionally filtered by category) — if this isn't used externally, consider removing it
+router.get('/books', async (req, res) => {
   try {
-    const {id} = req.params;
-    const {title, author, description, price, category, stock, imageUrl} = req.body;
-    const updatedBook = await Book.findByIdAndUpdate(
-      id,
-      { title, author, description, price, category, stock, imageUrl },
-      { new: true ,runValidators: true }
-    )
-    res.status(200).json({ success: true, data: updatedBook });
-
-    if (!updatedBook) {
-      return res.status(404).json({ success: false, message: 'Book not found' });
-    }
+    const { category } = req.query;
+    const filter = category ? { category } : {};
+    const books = await Book.find(filter);
+    res.status(200).json(books);
   } catch (error) {
-    console.error('Error updating book:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error fetching books:', error);
+    res.status(500).json({ message: 'Server error' });
   }
-})
+});
 
+// ✅ Health check
+router.get('/test', (req, res) => {
+  res.send('Backend working');
+});
+
+// ✅ Get single book by ID (moved to bottom, and added ID validation)
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid book ID' });
+  }
+
+  try {
+    const book = await Book.findById(id);
+
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    res.status(200).json(book);
+  } catch (error) {
+    console.error('Error fetching book by ID:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 module.exports = router;
