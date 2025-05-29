@@ -23,7 +23,7 @@ const navItems = [
   { name: "Pending Orders", icon: Package, href: "#pending-orders" },
   { name: "My Books", icon: BookOpen, href: "#my-books" },
   { name: "Profile", icon: Settings, href: "#profile" },
-  { name: "Logout", icon: LogOut, href: "#logout" }, // fixed typo from '#logiut' to '#logout'
+  { name: "Logout", icon: LogOut, href: "#logout" },
 ];
 
 export default function BookEcommerceDashboard() {
