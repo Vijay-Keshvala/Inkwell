@@ -21,7 +21,7 @@ export const NavBar = () => {
   }, [])
 
   const handleProfileClick = () => {
-    navigate('/dashboard')
+    navigate('/user-profile')
   }
 
   const handleLogout = () => {

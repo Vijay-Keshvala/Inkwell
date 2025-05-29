@@ -33,7 +33,7 @@ const Login = () => {
       if (!isSignUp && data.token) {
         localStorage.setItem('token', data.token);
       }
-      navigate('/dashboard');
+      navigate('/user-profile');
 
 
     } catch (err) {
