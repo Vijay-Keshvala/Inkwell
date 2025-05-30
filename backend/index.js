@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 require('dotenv').config() 
 const userRoutes = require('./routes/userRoutes')
+const cartRoutes = require('./routes/cartRoutes')
 const bookRoutes = require('./routes/bookRoutes')
 const protectedRoutes = require('./routes/protectedRoutes')
 const adminBookRoutes = require('./routes/adminBookRoutes');
@@ -30,6 +31,7 @@ app.use('/api/user', userRoutes);
 app.use('/api', protectedRoutes);
 app.use('/api/books',bookRoutes)
 app.use('/api/admin/books', adminBookRoutes);
+app.use('/api',cartRoutes)
 app.get('/test', (req, res) => {
     res.send('Server is up');
   });

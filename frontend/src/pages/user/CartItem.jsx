@@ -1,69 +1,33 @@
-import React, { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingCart, MapPin, CreditCard, Truck, ArrowLeft, Tag } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingCart,
+  MapPin,
+  CreditCard,
+  Truck,
+  ArrowLeft,
+  Tag,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import { Checkbox } from "./ui/checkbox";
 import { Link } from "react-router-dom";
 
-// Sample cart data
-const initialCartItems = [
-  {
-    id: 1,
-    title: "The Silent Echo",
-    author: "Maria Johnson",
-    format: "Hardcover",
-    price: 24.99,
-    originalPrice: 29.99,
-    quantity: 1,
-    coverImage: "/placeholder.svg?height=120&width=80&text=Book1",
-    inStock: true,
-    isbn: "978-0123456789",
-  },
-  {
-    id: 2,
-    title: "Modern Philosophy: A Complete Guide",
-    author: "Thomas Wright",
-    format: "Paperback",
-    price: 18.99,
-    originalPrice: 18.99,
-    quantity: 2,
-    coverImage: "/placeholder.svg?height=120&width=80&text=Book2",
-    inStock: true,
-    isbn: "978-0987654321",
-  },
-  {
-    id: 3,
-    title: "The Art of Fiction Writing",
-    author: "Elizabeth Stone",
-    format: "eBook",
-    price: 12.99,
-    originalPrice: 16.99,
-    quantity: 1,
-    coverImage: "/placeholder.svg?height=120&width=80&text=Book3",
-    inStock: true,
-    isbn: "978-0456789123",
-  },
-  {
-    id: 4,
-    title: "History of Ancient Civilizations",
-    author: "Robert Green",
-    format: "Audiobook",
-    price: 22.5,
-    originalPrice: 25.0,
-    quantity: 1,
-    coverImage: "/placeholder.svg?height=120&width=80&text=Book4",
-    inStock: false,
-    isbn: "978-0789123456",
-  },
-];
-
 export default function CartItem() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const [cartItems, setCartItems] = useState([]);
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState({
@@ -79,15 +43,42 @@ export default function CartItem() {
     isDefault: false,
   });
 
-  // Calculate totals
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
+
+        const response = await fetch("http://localhost:4000/api/cart-all", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch cart");
+
+        const data = await response.json();
+        setCartItems(data);
+      } catch (error) {
+        console.error("Error fetching cart items:", error.message);
+      }
+    };
+
+    fetchCartItems();
+  }, []);
+
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const savings = cartItems.reduce((sum, item) => sum + (item.originalPrice - item.price) * item.quantity, 0);
+  const savings = cartItems.reduce(
+    (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
+    0
+  );
   const shipping = subtotal > 50 ? 0 : 5.99;
-  const tax = subtotal * 0.08; // 8% tax
-  const promoDiscount = promoApplied ? subtotal * 0.1 : 0; // 10% discount
+  const tax = subtotal * 0.08;
+  const promoDiscount = promoApplied ? subtotal * 0.1 : 0;
   const total = subtotal + shipping + tax - promoDiscount;
 
-  // Update quantity
   const updateQuantity = (id, newQuantity) => {
     if (newQuantity < 1) return;
     setCartItems((items) =>
@@ -95,12 +86,10 @@ export default function CartItem() {
     );
   };
 
-  // Remove item
   const removeItem = (id) => {
     setCartItems((items) => items.filter((item) => item.id !== id));
   };
 
-  // Handle address change
   const handleAddressChange = (e) => {
     const { name, value, type, checked } = e.target;
     setDeliveryAddress((prev) => ({
@@ -109,7 +98,6 @@ export default function CartItem() {
     }));
   };
 
-  // Apply promo code
   const applyPromoCode = () => {
     if (promoCode.toLowerCase() === "save10") {
       setPromoApplied(true);
@@ -119,15 +107,13 @@ export default function CartItem() {
     }
   };
 
-  // Handle checkout
   const handleCheckout = () => {
     if (!deliveryAddress.firstName || !deliveryAddress.email || !deliveryAddress.address) {
       alert("Please fill in all required delivery information.");
       return;
     }
 
-    // In a real app, this would process the payment
-    alert(`Order placed successfully! Total: $${total.toFixed(2)}`);
+    alert(`Order placed successfully! Total: Rs/- ${total.toFixed(2)}`);
   };
 
   if (cartItems.length === 0) {
@@ -138,10 +124,10 @@ export default function CartItem() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
           <p className="text-gray-600 mb-6">Add some books to get started!</p>
           <Link to={'/products'}>
-          <Button className="cursor-pointer">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Continue Shopping
-          </Button>
+            <Button className="cursor-pointer">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Continue Shopping
+            </Button>
           </Link>
         </div>
       </div>
@@ -202,9 +188,9 @@ export default function CartItem() {
                             <p className="text-gray-600">by {item.author}</p>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="outline">{item.format}</Badge>
-                              {!item.inStock && <Badge variant="destructive">Out of Stock</Badge>}
+                              {/* {!item.inStock && <Badge variant="destructive">Out of Stock</Badge>} */}
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">ISBN: {item.isbn}</p>
+                            {/* <p className="text-xs text-gray-500 mt-1">ISBN: {item.isbn}</p> */}
                           </div>
 
                           <Button
@@ -220,7 +206,7 @@ export default function CartItem() {
                         {/* Price and Quantity */}
                         <div className="flex items-center justify-between mt-4">
                           <div className="flex items-center space-x-2">
-                            <span className="font-semibold text-lg">${item.price.toFixed(2)}</span>
+                            <span className="font-semibold text-lg">Rs/- {item.price.toFixed(2)}</span>
                             {item.originalPrice > item.price && (
                               <span className="text-sm text-gray-500 line-through">
                                 ${item.originalPrice.toFixed(2)}
@@ -251,7 +237,7 @@ export default function CartItem() {
 
                         <div className="text-right mt-2">
                           <span className="font-semibold">
-                            Subtotal: ${(item.price * item.quantity).toFixed(2)}
+                            Subtotal: Rs/- {(item.price * item.quantity).toFixed(2)}
                           </span>
                         </div>
                       </div>
@@ -364,7 +350,7 @@ export default function CartItem() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2">
                   <Checkbox
                     id="isDefault"
                     name="isDefault"
@@ -374,7 +360,7 @@ export default function CartItem() {
                     }
                   />
                   <Label htmlFor="isDefault">Save as default address</Label>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           </div>
@@ -414,13 +400,13 @@ export default function CartItem() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal ({cartItems.length} items)</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>Rs/- {subtotal.toFixed(2)}</span>
                   </div>
 
                   {savings > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>You Save</span>
-                      <span>-${savings.toFixed(2)}</span>
+                      <span>-Rs/- {savings.toFixed(2)}</span>
                     </div>
                   )}
 
@@ -429,24 +415,24 @@ export default function CartItem() {
                       <Truck className="mr-1 h-4 w-4" />
                       Shipping
                     </span>
-                    <span>{shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}</span>
+                    <span>{shipping === 0 ? "FREE" : `Rs/- ${shipping.toFixed(2)}`}</span>
                   </div>
 
                   <div className="flex justify-between">
                     <span>Tax</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>Rs/-{tax.toFixed(2)}</span>
                   </div>
 
                   {promoApplied && (
                     <div className="flex justify-between text-green-600">
                       <span>Promo Discount (10%)</span>
-                      <span>-${promoDiscount.toFixed(2)}</span>
+                      <span>-Rs/- {promoDiscount.toFixed(2)}</span>
                     </div>
                   )}
 
                   {shipping > 0 && (
                     <div className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
-                      💡 Add ${(50 - subtotal).toFixed(2)} more for FREE shipping!
+                      💡 Add Rs/- {(50 - subtotal).toFixed(2)} more for FREE shipping!
                     </div>
                   )}
                 </div>
@@ -455,7 +441,7 @@ export default function CartItem() {
 
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Rs/- {total.toFixed(2)}</span>
                 </div>
 
                 <Button className="w-full" size="lg" onClick={handleCheckout}>
@@ -477,7 +463,7 @@ export default function CartItem() {
               <CardContent className="text-sm space-y-2">
                 <div className="flex items-center">
                   <Truck className="mr-2 h-4 w-4 text-green-600" />
-                  <span>Free shipping on orders over $50</span>
+                  <span>Free shipping on orders over Rs/- 50</span>
                 </div>
                 <div className="flex items-center">
                   <MapPin className="mr-2 h-4 w-4 text-blue-600" />
