@@ -10,12 +10,13 @@ import Footer from './components/Footer';
 import UserProfile from './pages/user/UserProfile';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import CartItem from './pages/user/CartItem';
 
 // Wrapper component to access location
 function AppWrapper() {
   const location = useLocation();
   // Condition to check if current route is '/user-profile'
-  const hideNavFooter = location.pathname === '/user-profile';
+  const hideNavFooter = location.pathname === '/user-profile' || location.pathname === '/cart';
 
   return (
     <>
@@ -28,6 +29,7 @@ function AppWrapper() {
         <Route path='/about' element={<AboutUs />} />
         <Route path='/login' element={<Login />} />
         <Route path='/user-profile' element={<UserProfile />} />
+        <Route path='/cart' element={<CartItem/>}/>
       </Routes>
       {!hideNavFooter && <Footer />}
       <ToastContainer position="top-right" autoClose={3000} />
