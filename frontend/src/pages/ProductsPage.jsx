@@ -52,7 +52,7 @@ const ProductsPage = () => {
           name: book.title,
           author: book.author,
           category: book.category,
-          price: `$${book.price.toFixed(2)}`,
+          price: `Rs/- ${book.price.toFixed(2)}`,
           imageSrc: book.imageUrl || 'https://via.placeholder.com/300x400',
           imageAlt: book.title,
           href: `/product-details/${book._id}`, // example link to detail page

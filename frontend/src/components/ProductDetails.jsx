@@ -2,16 +2,71 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { StarIcon } from '@heroicons/react/20/solid';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
 
 const ProductDetails = () => {
+    const navigate = useNavigate();
+    const [quantity, setQuantity] = useState(1);
     const { id } = useParams();
     const [book, setBook] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+
+
+    const fetchUserId = async (token) => {
+        try {
+            const res = await fetch('http://localhost:4000/api/user/me', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (!res.ok) throw new Error('Failed to fetch user');
+            const data = await res.json();
+            return data.userId; // Adjust if your backend returns a different key
+        } catch (err) {
+            console.error('Error fetching user ID:', err);
+            return null;
+        }
+    };
+    
+
+    const handleAddToCart = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        try {
+            const res = await fetch('http://localhost:4000/api/user/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    bookId: book._id,
+                    quantity,
+                }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success(data.message || 'Book added to cart');
+            } else {
+                toast.error(data.message || 'Failed to add to cart');
+            }
+        } catch (err) {
+            toast.error('Error adding to cart');
+            console.error(err);
+        }
+    };
+    
+    
+    
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -93,8 +148,30 @@ const ProductDetails = () => {
                         <p className="mt-2 text-gray-700 text-sm">{book.description || "No description available."}</p>
                     </div>
 
+                    {/* Quantity Selector */}
+                    <div className="mt-6">
+                        <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+                            Quantity
+                        </label>
+                        <select
+                            id="quantity"
+                            name="quantity"
+                            value={quantity}
+                            onChange={(e) => setQuantity(parseInt(e.target.value))}
+                            className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                            {[...Array(10).keys()].map((i) => (
+                                <option key={i + 1} value={i + 1}>
+                                    {i + 1}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     {/* CTA Button */}
-                    <button className="mt-25 w-full bg-indigo-600 text-white font-medium py-3 rounded hover:bg-indigo-700 transition">
+                    <button
+                        className="cursor-pointer mt-10 w-full bg-indigo-600 text-white font-medium py-3 rounded hover:bg-indigo-700 transition"
+                        onClick={handleAddToCart}
+                    >
                         Add to Cart
                     </button>
                 </div>

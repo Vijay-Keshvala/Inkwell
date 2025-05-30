@@ -4,7 +4,15 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const User = require('../models/User')
 const authMiddleware = require('../middleware/userMiddleware'); // ✅ Imported
+const Cart = require('../models/Cart');
+const Book = require('../models/Book');
 
+
+// Example: GET /api/me
+router.get('/me', authMiddleware, async (req, res) => {
+  const userId = req.user.id; // or req.user._id
+  res.json({ userId });
+});
 
 
 // Register //
@@ -76,4 +84,51 @@ router.post('/login', async (req, res) => {
       res.status(500).json({ message: 'Failed to update name', error: err.message });
     }
   });
+
+
+  router.post('/cart', authMiddleware, async (req, res) => {
+    try {
+      const userId = req.user.id; // Now comes from the verified token, NOT the body
+      const { bookId, quantity } = req.body;
+  
+      if (!bookId || !quantity) {
+        return res.status(400).json({ message: 'Book ID and quantity are required' });
+      }
+  
+      // Find or create cart for this user
+      let cart = await Cart.findOne({ userId });
+  
+      if (!cart) {
+        cart = new Cart({ userId, items: [] });
+      }
+  
+      const existingItem = cart.items.find(item => item.productId.toString() === bookId);
+  
+      if (existingItem) {
+        // If already in cart, increase quantity and update price
+        existingItem.quantity += quantity;
+        existingItem.totalPrice = existingItem.price * existingItem.quantity;
+      } else {
+        // Fetch book details for price and title (optional, or send from client)
+        const book = await Book.findById(bookId);
+        if (!book) return res.status(404).json({ message: 'Book not found' });
+  
+        cart.items.push({
+          productId: book._id,
+          title: book.title,
+          price: book.price,
+          quantity,
+          totalPrice: book.price * quantity,
+        });
+      }
+  
+      await cart.save();
+      return res.json({ message: 'Book added to cart', cart });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+
   module.exports = router;
